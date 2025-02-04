@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #chat {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ccc;
+        }
+        #message {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat"></div>
+    <input type="text" id="message" placeholder="Введите сообщение...">
+
+    <script>
+        const chat = document.getElementById('chat');
+        const messageInput = document.getElementById('message');
+
+        // Функция для загрузки сообщений
+        async function loadMessages() {
+            const response = await fetch('/messages');
+            const messages = await response.json();
+            chat.innerHTML = '';  // Очищаем перед обновлением
+            messages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.textContent = msg;
+                chat.appendChild(messageElement);
+            });
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Отправка сообщения
+        messageInput.addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                const message = messageInput.value;
+                if (!message.trim()) return;
+
+                await fetch('/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                messageInput.value = '';
+                loadMessages(); // Загружаем новые сообщения
+            }
+        });
+
+        // Загружаем сообщения каждые 2 секунды
+        setInterval(loadMessages, 2000);
+
+        // Первоначальная загрузка
+        loadMessages();
+    </script>
+</body>
+</html>

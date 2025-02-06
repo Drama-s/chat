@@ -44,6 +44,10 @@
             padding: 10px;
             box-sizing: border-box;
         }
+        .username {
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -66,7 +70,7 @@
         // Функция входа
         async function log() {
                 const username = document.getElementById('user_name').value.trim();
-                const usercod = document.getElementById('user_cod').value.trim(); // Было usercod, но в JSON отправлялся password
+                const usercod = document.getElementById('user_cod').value.trim(); 
 
                 if (!username || !usercod) {
                     alert('Введите логин и пароль');
@@ -76,7 +80,7 @@
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password: usercod }) // Исправил usercod -> password
+                    body: JSON.stringify({ username, password: usercod }) 
                 });
 
                 const result = await response.json();
@@ -84,7 +88,7 @@
                 if (result.status === 'ok') {
                 localStorage.setItem('username', username);
                 document.getElementById('auth').style.display = 'none';
-                document.getElementById('chat_cont').style.display = 'flex'; // Исправлено!
+                document.getElementById('chat_cont').style.display = 'flex'; 
                 } else {
                     alert(result.message || 'Ошибка входа');
                 }
@@ -120,10 +124,20 @@
         async function loadMessages() {
             const response = await fetch('/messages');
             const messages = await response.json();
+
             chat.innerHTML = '';  
-            messages.forEach(msg => {
+
+            messages.forEach(({ username, message }) => {
                 const messageElement = document.createElement('div');
-                messageElement.textContent = msg;
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = `${username}: `;
+                nameSpan.classList.add('username');  
+
+                
+                messageElement.appendChild(nameSpan);
+                messageElement.appendChild(document.createTextNode(message));
+
                 chat.appendChild(messageElement);
             });
             chat.scrollTop = chat.scrollHeight;
@@ -133,12 +147,14 @@
         messageInput.addEventListener('keypress', async function(e) {
             if (e.key === 'Enter') {
                 const message = messageInput.value;
+                const username = localStorage.getItem('username');
+
                 if (!message.trim()) return;
 
                 await fetch('/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ username, message })
                 });
 
                 messageInput.value = '';

@@ -4,8 +4,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://dramas25.pythonanywhere.com"}})
 
-messages = []  # Храним сообщения в памяти (не для продакшена)
-
+messages = []  
 users = {}  
 
 @app.route('/login', methods=['POST'])
@@ -37,9 +36,10 @@ def index():
 @app.route('/send', methods=['POST'])
 def send_message():
     data = request.get_json()
+    username = data.get('username', '')
     message = data.get('message', '')
     if message:
-        messages.append(message)  # Сохраняем сообщение
+        messages.append({"username": username, "message": message})  
     return jsonify({"status": "ok"}), 200
 
 @app.route('/messages', methods=['GET'])

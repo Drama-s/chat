@@ -64,31 +64,32 @@
         const messageInput = document.getElementById('message');
 
         // Функция входа
-        async function log(){
-            const user_name = document.getElementById('user_name').value.trim();
-            const user_cod = document.getElementById('user_cod').value.trim();
+        async function log() {
+                const username = document.getElementById('user_name').value.trim();
+                const usercod = document.getElementById('user_cod').value.trim(); // Было usercod, но в JSON отправлялся password
 
-            if(!user_name || !user_cod) {
-                alert('Введите логин и пароль');
-                return;
-            }
-            
-            const response = await fetch('/login',{
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+                if (!username || !usercod) {
+                    alert('Введите логин и пароль');
+                    return;
+                }
 
-            const result = await response.json();
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password: usercod }) // Исправил usercod -> password
+                });
 
-            if (result.status === 'ok') {
-                localStorage.setItem('username', username); 
+                const result = await response.json();
+
+                if (result.status === 'ok') {
+                localStorage.setItem('username', username);
                 document.getElementById('auth').style.display = 'none';
-                document.getElementById('chat').style.display = 'block';
-            } else{
-                alert(result.message || 'Ошибка входа');
+                document.getElementById('chat_cont').style.display = 'flex'; // Исправлено!
+                } else {
+                    alert(result.message || 'Ошибка входа');
+                }
             }
-        }
+
 
         // Функция регистрации
         async function reg() {
